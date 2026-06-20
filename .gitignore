@@ -1,0 +1,24 @@
+# Go
+bin/
+*.exe
+*.test
+*.out
+
+# Environment
+.env
+.env.*
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# Mac
+.DS_Store
+
+# IDE
+.vscode/
+
+# Logs
+*.log
