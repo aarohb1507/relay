@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"net/http"
-    "encoding/json"
     "relay/gateway/internal/handlers"
 )
 
@@ -13,8 +12,9 @@ func rootHandler(w http.ResponseWriter, r *http.Request){
 }
 
 func main() {
+
     http.HandleFunc("/", rootHandler)
-    http.HandleFunc("/health", handlers.healthHandler)
+    http.HandleFunc("/health", handlers.HealthHandler)
 
 	fmt.Println("Server running on port.")
     
@@ -22,4 +22,5 @@ func main() {
     if err != nil {
         fmt.Println("Server error: ", err)
     }
+    
 }

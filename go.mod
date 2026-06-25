@@ -1,3 +1,3 @@
-module relay/gateway
+module relay
 
 go 1.26.1
