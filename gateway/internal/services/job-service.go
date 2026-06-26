@@ -5,6 +5,8 @@ import (
 	"fmt"
 )
 
+var jobs []models.Job
+
 var jobCounter = 0
 
 func CreateJob(tool string) models.Job{
@@ -16,6 +18,8 @@ func CreateJob(tool string) models.Job{
 		Tool: tool,
 		Status: "QUEUED",
 	}
+
+	jobs = append(jobs, job)
 
 	return job
 }
