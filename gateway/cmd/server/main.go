@@ -15,6 +15,7 @@ func main() {
 
     http.HandleFunc("/", rootHandler)
     http.HandleFunc("/health", handlers.HealthHandler)
+    http.HandleFunc("/jobs", handlers.JobHandler)
 
 	fmt.Println("Server running on port.")
     
