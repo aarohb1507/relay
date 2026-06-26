@@ -23,3 +23,14 @@ func CreateJob(tool string) models.Job{
 
 	return job
 }
+
+func GetJob(id string) (models.Job, bool){
+	
+	for _, job := range jobs {
+		if job.ID == id {
+			return job, true
+		}
+	}
+
+	return models.Job{}, false
+}

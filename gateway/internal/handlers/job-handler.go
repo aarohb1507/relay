@@ -10,23 +10,48 @@ import (
 
 func JobHandler(w http.ResponseWriter, r *http.Request) {
 
-	var job models.Job
+	switch r.Method{
 
-	err:= json.NewDecoder(r.Body).Decode(&job)
+	case http.MethodPost:
+		
+			var job models.Job
 
-	if err != nil {
-		http.Error(w, "Invalid JSON", http.StatusBadRequest)
-		return
-	}
+			err:= json.NewDecoder(r.Body).Decode(&job)
+
+			if err != nil {
+				http.Error(w, "Invalid JSON", http.StatusBadRequest)
+				return
+			}
+			
+
+			if job.Tool == "" {
+				http.Error(w, "Tool Empty", http.StatusBadRequest)
+				return
+			}
+			createdJob := services.CreateJob(job.Tool)
+
+			w.Header().Set("Content-Type", "application/json")
+			json.NewEncoder(w).Encode(createdJob)
+		
+	case http.MethodGet:
+
+			id := r.URL.Query().Get("id")
+
+			job, found := services.GetJob(id)
+	
+			if !found {
+				http.Error(w, "Job not found", http.StatusNotFound)
+				return
+			}
+
+			w.Header().Set("Content-Type", "application/json")
+			json.NewEncoder(w).Encode(job)
 	
 
-	if job.Tool == "" {
-		http.Error(w, "Tool Empty", http.StatusBadRequest)
-		return
+	default:
+		http.Error(w, "Method not Allowed", http.StatusMethodNotAllowed)	
+		
 	}
-	createdJob := services.CreateJob(job.Tool)
-
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(createdJob)
 
 }
+
