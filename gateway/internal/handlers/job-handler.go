@@ -10,13 +10,13 @@ import (
 
 func JobHandler(w http.ResponseWriter, r *http.Request) {
 
-	switch r.Method{
+	switch r.Method {
 
 	case http.MethodPost:
 		
 			var job models.Job
 
-			err:= json.NewDecoder(r.Body).Decode(&job)
+			err := json.NewDecoder(r.Body).Decode(&job)
 
 			if err != nil {
 				http.Error(w, "Invalid JSON", http.StatusBadRequest)
@@ -46,6 +46,33 @@ func JobHandler(w http.ResponseWriter, r *http.Request) {
 
 			w.Header().Set("Content-Type", "application/json")
 			json.NewEncoder(w).Encode(job)
+	
+	
+
+	case http.MethodPath:
+		
+		id := r.URL.Query().Get("id")
+
+		var request struct {
+			Status string `json:"status"`
+		}
+
+		err := http.NewDecoder(r.Body).Decode(&request)
+
+		if err != nil {
+		http.Error(w, "Invalid JSON", http.StatusBadRequest)
+		return
+		}
+
+		job, found := services.UpdateJobStatus(id, request.Status)
+
+		if !found {
+			http.Error(w, "Job not found", http.StatusNotFound)
+			return
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(job)
 	
 
 	default:
