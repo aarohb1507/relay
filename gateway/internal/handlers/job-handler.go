@@ -20,7 +20,7 @@ func JobHandler(w http.ResponseWriter, r *http.Request) {
 
 			if err != nil {
 				http.Error(w, "Invalid JSON", http.StatusBadRequest)
-				return
+			``	return
 			}
 			
 
@@ -49,7 +49,7 @@ func JobHandler(w http.ResponseWriter, r *http.Request) {
 	
 	
 
-	case http.MethodPath:
+	case http.MethodPatch:
 		
 		id := r.URL.Query().Get("id")
 
@@ -57,7 +57,7 @@ func JobHandler(w http.ResponseWriter, r *http.Request) {
 			Status string `json:"status"`
 		}
 
-		err := http.NewDecoder(r.Body).Decode(&request)
+		err := json.NewDecoder(r.Body).Decode(&request)
 
 		if err != nil {
 		http.Error(w, "Invalid JSON", http.StatusBadRequest)

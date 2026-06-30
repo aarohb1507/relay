@@ -18,7 +18,7 @@ func CreateJob(tool string) models.Job{
 		ID: fmt.Sprintf("job-%d", jobCounter),
 		Tool: tool,
 		Status: "QUEUED",
-		
+
 	}
 
 	jobs = append(jobs, job)
@@ -40,7 +40,7 @@ func GetJob(id string) (models.Job, bool){
 	return models.Job{}, false
 }
 
-func UpdateJobStatus(id string, status string) (models.job, bool) {
+func UpdateJobStatus(id string, status string) (models.Job, bool) {
 	
 	for i, job := range jobs {
 
