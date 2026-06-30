@@ -42,7 +42,7 @@ func GetJob(id string) (models.Job, bool){
 
 func UpdateJobStatus(id string, status string) (models.Job, bool) {
 	
-	for i, job := range jobs {
+	for i := range jobs {
 
 		if jobs[i].ID == id {
 

@@ -13,7 +13,9 @@ func rootHandler(w http.ResponseWriter, r *http.Request){
 }
 
 func main() {
+    
     db.Connect()
+
     http.HandleFunc("/", rootHandler)
     http.HandleFunc("/health", handlers.HealthHandler)
     http.HandleFunc("/jobs", handlers.JobHandler)
