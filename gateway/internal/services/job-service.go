@@ -7,8 +7,6 @@ import (
 	"log"
 )
 
-var jobs []models.Job
-
 var jobCounter = 0
 
 func CreateJob(tool string) (models.Job, error){
@@ -64,15 +62,16 @@ func GetJob(id string) (models.Job, bool){
 
 func UpdateJobStatus(id string, status string) (models.Job, bool) {
 	
-	for i := range jobs {
+	_, err := db.DB.Exec(
+		"UPDATE jobs SET status = $1 WHERE id = $2",
+		status,
+		id,
+	)
 
-		if jobs[i].ID == id {
-
-			jobs[i].Status = status
-
-			return jobs[i], true
-		}
+	if err != nil {
+		log.Printf("failed to update job %s : %v", id, err)
+		return models.Job{}, false
 	}
 
-	return models.Job{}, false
+	return GetJob(id)
 }
