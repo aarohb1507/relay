@@ -28,4 +28,6 @@ func Connect() {
 	}
 
 	log.Println("Connected to PostgreSQL")
+
+	CreateJobsTable()
 }
