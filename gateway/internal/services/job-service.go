@@ -42,16 +42,23 @@ func CreateJob(tool string) (models.Job, error){
 
 func GetJob(id string) (models.Job, bool){
 	
-	for _, job := range jobs {
+	var job models.Job
 
-		if job.ID == id {
+	err := db.DB.QueryRow(
+		"SELECT id, tool, status from jobs where id = $1",
+		id,
+	).Scan(
+		&job.ID,
+		&job.Tool,
+		&job.Status,
+	)
 
-			return job, true
-
-		}
+	if err != nil {
+		log.Printf("failed to fetch job %s: %v", id, err)
+		return models.Job{}, false
 	}
 
-	return models.Job{}, false
+	return job, true
 }
 
 
