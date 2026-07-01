@@ -7,7 +7,6 @@ import (
 	"relay/gateway/internal/services"
 )
 
-
 func JobHandler(w http.ResponseWriter, r *http.Request) {
 
 	switch r.Method {
@@ -28,7 +27,16 @@ func JobHandler(w http.ResponseWriter, r *http.Request) {
 				http.Error(w, "Tool Empty", http.StatusBadRequest)
 				return
 			}
-			createdJob := services.CreateJob(job.Tool)
+			createdJob, err := services.CreateJob(job.Tool)
+
+			if err != nil {
+				http.Error(
+					w,
+					"Failed to create job",
+					http.StatusInternalServerError,
+				)
+				return
+			}
 
 			w.Header().Set("Content-Type", "application/json")
 			json.NewEncoder(w).Encode(createdJob)

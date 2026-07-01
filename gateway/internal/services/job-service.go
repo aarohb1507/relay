@@ -2,28 +2,42 @@ package services
 
 import (
 	"relay/gateway/internal/models"
+	"relay/gateway/internal/db"
 	"fmt"
+	"log"
 )
 
 var jobs []models.Job
 
 var jobCounter = 0
 
-func CreateJob(tool string) models.Job{
+func CreateJob(tool string) (models.Job, error){
 
 	jobCounter++
-	
-	job:= models.Job{
+
+	job := models.Job {
 
 		ID: fmt.Sprintf("job-%d", jobCounter),
 		Tool: tool,
-		Status: "QUEUED",
+		Status: "QUEUED"	
 
 	}
+	
+	_, err := db.DB.Exec(
 
-	jobs = append(jobs, job)
+		"INSERT INTO jobs (id, tool, status) VALUES ($1, $2, $3)",
+		job.ID,
+		job.Tool,
+		job.Status,
 
-	return job
+	)
+
+	if err != nil {
+		log.Printf("failed to insert job %s: %v", job.ID, err)
+		return models.Job{}, err
+	}
+
+	return job, nil
 }
 
 func GetJob(id string) (models.Job, bool){
