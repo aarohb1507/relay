@@ -72,6 +72,11 @@ func JobHandler(w http.ResponseWriter, r *http.Request) {
 		return
 		}
 
+		if request.Status == "" {
+			http.Error(w, "Status Empty", http.StatusBadRequest)
+			return
+		}
+
 		job, found := services.UpdateJobStatus(id, request.Status)
 
 		if !found {
