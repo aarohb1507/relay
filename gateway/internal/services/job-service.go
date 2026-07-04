@@ -1,10 +1,12 @@
 package services
 
 import (
+
 	"relay/gateway/internal/models"
-	"relay/gateway/internal/db"
+	"relay/gateway/internal/repository"
 	"fmt"
 	"log"
+
 )
 
 var jobCounter = 0
@@ -21,14 +23,7 @@ func CreateJob(tool string) (models.Job, error){
 
 	}
 	
-	_, err := db.DB.Exec(
-
-		"INSERT INTO jobs (id, tool, status) VALUES ($1, $2, $3)",
-		job.ID,
-		job.Tool,
-		job.Status,
-
-	)
+	err := repository.CreateJob(job)
 
 	if err != nil {
 		log.Printf("failed to insert job %s: %v", job.ID, err)
@@ -40,38 +35,13 @@ func CreateJob(tool string) (models.Job, error){
 
 func GetJob(id string) (models.Job, bool){
 	
-	var job models.Job
+	return repository.GetJob(id)
 
-	err := db.DB.QueryRow(
-		"SELECT id, tool, status from jobs where id = $1",
-		id,
-	).Scan(
-		&job.ID,
-		&job.Tool,
-		&job.Status,
-	)
-
-	if err != nil {
-		log.Printf("failed to fetch job %s: %v", id, err)
-		return models.Job{}, false
-	}
-
-	return job, true
 }
 
 
 func UpdateJobStatus(id string, status string) (models.Job, bool) {
 	
-	_, err := db.DB.Exec(
-		"UPDATE jobs SET status = $1 WHERE id = $2",
-		status,
-		id,
-	)
+	return repository.UpdateJobStatus(id, status)
 
-	if err != nil {
-		log.Printf("failed to update job %s : %v", id, err)
-		return models.Job{}, false
-	}
-
-	return GetJob(id)
 }
