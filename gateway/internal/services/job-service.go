@@ -4,6 +4,8 @@ import (
 
 	"relay/gateway/internal/models"
 	"relay/gateway/internal/repository"
+	"relay/gateway/internal/redis"
+
 	"fmt"
 	"log"
 
@@ -29,6 +31,14 @@ func CreateJob(tool string) (models.Job, error){
 		log.Printf("failed to insert job %s: %v", job.ID, err)
 		return models.Job{}, err
 	}
+
+	err = redis.PublishJob(job)
+
+	if err != nil {
+		log.Printf("failed to publish job on queue %s: %v", job.ID, err)
+		return models.Job{}, err
+	}
+
 
 	return job, nil
 }

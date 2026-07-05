@@ -27,4 +27,3 @@ func Connect() {
 	log.Println("Connected to Redis")
 }
 
-func PublishJob(job mode)
