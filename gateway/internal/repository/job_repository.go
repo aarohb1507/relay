@@ -15,7 +15,7 @@ func CreateJob(job models.Job) error{
 		"INSERT INTO jobs (id, tool, status) VALUES ($1, $2, $3)",
 		job.ID,
 		job.Tool,
-		job.Status
+		job.Status,
 	)
 
 	if err != nil {

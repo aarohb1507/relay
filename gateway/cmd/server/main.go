@@ -1,10 +1,13 @@
 package main
 
 import (
+
 	"fmt"
 	"net/http"
     "relay/gateway/internal/handlers"
     "relay/gateway/internal/db"
+    "relay/gateway/internal/redis"
+
 )
 
 
@@ -15,6 +18,7 @@ func rootHandler(w http.ResponseWriter, r *http.Request){
 func main() {
     
     db.Connect()
+    redis.Connect()
 
     http.HandleFunc("/", rootHandler)
     http.HandleFunc("/health", handlers.HealthHandler)
