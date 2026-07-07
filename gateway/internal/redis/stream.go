@@ -35,7 +35,7 @@ func PublishJob(job models.Job) error {
 func ReadJobs() error {
 
 	streams, err := Client.XRead(Ctx, &goredis.XReadArgs{
-		Streams: []string{"relay-streams", "0"},
+		Streams: []string{"relay-stream", "0"},
 		Count: 10,
 	}).Result()
 
