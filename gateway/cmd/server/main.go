@@ -19,7 +19,6 @@ func main() {
     
     db.Connect()
     redis.Connect()
-    redis.ReadJobs()
 
     http.HandleFunc("/", rootHandler)
     http.HandleFunc("/health", handlers.HealthHandler)
