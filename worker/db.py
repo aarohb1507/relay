@@ -11,3 +11,17 @@ conn = psycopg2.connect(
 cursor = conn.cursor()
 
 print("Connected to PostgreSQL")
+
+
+def update_job_status(job_id, status):
+
+    cursor.execute(
+        """
+        UPDATE jobs
+        SET status = %s
+        WHERE id = %s
+        """,
+        (status, job_id),
+    )
+
+    conn.commit()
