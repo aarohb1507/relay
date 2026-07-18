@@ -17,7 +17,15 @@ def process_jobs(jobs):
 
                 time.sleep(2)
 
-                db.update_job_status(data["job_id"], "COMPLETED")
+                result = {
+                    "temperature": 28,
+                    "city": "Bangalore",
+                }
+
+                db.complete_job(
+                    data["job_id"],
+                    result,
+                )
 
                 redis_client.client.xack(
                     "relay-stream",
@@ -27,7 +35,11 @@ def process_jobs(jobs):
 
                 print("ACK Sent")
 
+print("Worker starting loop...")
+
 while True:
+
+    print("Checking pending...")
 
     pending = redis_client.client.xreadgroup(
         groupname="relay-workers",
@@ -35,10 +47,13 @@ while True:
         streams={"relay-stream": "0"},
         count=1,
     )
+    print("Pending:", pending)
 
-    if pending:
+    if pending and pending[0][1]:
         process_jobs(pending)
         continue
+
+    print("Waiting for new jobs...")
 
     new_jobs = redis_client.client.xreadgroup(
         groupname="relay-workers",
@@ -47,6 +62,8 @@ while True:
         count=1,
         block=0,
     )
+
+    print("New Jobs:", new_jobs)
 
     process_jobs(new_jobs)
 

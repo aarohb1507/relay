@@ -1,4 +1,5 @@
 import psycopg2
+import json
 
 conn = psycopg2.connect(
     host="localhost",
@@ -22,6 +23,25 @@ def update_job_status(job_id, status):
         WHERE id = %s
         """,
         (status, job_id),
+    )
+
+    conn.commit()
+
+def complete_job(job_id, result):
+
+    cursor.execute(
+        """
+        UPDATE jobs
+        SET
+            status = %s,
+            result = %s
+        WHERE id = %s
+        """,
+        (
+            "COMPLETED",
+            json.dumps(result),
+            job_id,
+        ),
     )
 
     conn.commit()
