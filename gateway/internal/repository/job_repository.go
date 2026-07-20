@@ -7,6 +7,8 @@ import (
 	"relay/gateway/internal/db"
 	"relay/gateway/internal/models"
 
+	"encoding/json"
+
 )
 
 func CreateJob(job models.Job) error{
@@ -29,19 +31,25 @@ func CreateJob(job models.Job) error{
 func GetJob(id string) (models.Job, bool){
 
 	var job models.Job
+	var result []byte 
 
 	err := db.DB.QueryRow(
-		"SELECT id, tool, status from jobs where id = $1",
+		"SELECT id, tool, status, result from jobs where id = $1",
 		id,
 	).Scan(
 		&job.ID,
 		&job.Tool,
 		&job.Status,
+		&result,
 	)
 
 	if err != nil {
 		log.Printf("Job Not Found %s: %v", id, err)
 		return models.Job{}, false
+	}
+
+	if result != nil {
+		json.Unmarshal(result, &job.Result)
 	}
 
 	return job, true
