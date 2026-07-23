@@ -3,9 +3,13 @@ package handlers
 import (
 	"fmt"
 	"net/http"
+	"relay/gateway/internal/events"
 )
 
 func EventsHandler(w http.ResponseWriter, r *http.Request) {
+
+	id := r.URL.Query().Get("id")
+	events.Clients[id] = w
 
 	w.Header().Set("Content-Type", "text/event-stream")
 	w.Header().Set("Cache-Control", "no-cache")
