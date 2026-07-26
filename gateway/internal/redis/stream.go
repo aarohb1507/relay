@@ -15,20 +15,18 @@ func PublishJob(job models.Job) error {
 	id, err := Client.XAdd(Ctx, &goredis.XAddArgs{
 		Stream: "relay-stream",
 		Values: map[string]interface{}{
-			
+
 			"job_id": job.ID,
 			"tool":   job.Tool,
-
 		},
 	}).Result()
 
 	if err != nil {
-    log.Println("Redis publish failed:", err)
-    return err
-	}	
+		log.Println("Redis publish failed:", err)
+		return err
+	}
 
 	log.Println("Published to Redis with ID:", id)
-
 	return nil
 }
 
@@ -36,7 +34,7 @@ func ReadJobs() error {
 
 	streams, err := Client.XRead(Ctx, &goredis.XReadArgs{
 		Streams: []string{"relay-stream", "0"},
-		Count: 10,
+		Count:   10,
 	}).Result()
 
 	if err != nil {
