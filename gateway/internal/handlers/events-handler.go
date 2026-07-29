@@ -9,7 +9,7 @@ import (
 func EventsHandler(w http.ResponseWriter, r *http.Request) {
 
 	id := r.URL.Query().Get("id")
-	events.Clients[id] = w
+	events.Register(id, w)
 
 	w.Header().Set("Content-Type", "text/event-stream")
 	w.Header().Set("Cache-Control", "no-cache")

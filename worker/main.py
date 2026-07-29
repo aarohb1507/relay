@@ -1,6 +1,7 @@
 import time
 import db
 import redis_client
+import publisher
 
 def process_jobs(jobs):
 
@@ -13,6 +14,11 @@ def process_jobs(jobs):
 
                 db.update_job_status(data["job_id"], "RUNNING")
 
+                publisher.publish_event(
+                    data["job_id"],
+                    "RUNNING",
+                )
+
                 print("Executing Tool...")
 
                 time.sleep(2)
@@ -24,6 +30,12 @@ def process_jobs(jobs):
 
                 db.complete_job(
                     data["job_id"],
+                    result,
+                )
+
+                publisher.publish_event(
+                    data["job_id"],
+                    "COMPLETED",
                     result,
                 )
 
