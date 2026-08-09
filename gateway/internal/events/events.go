@@ -4,32 +4,50 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"sync"
 
 	"relay/gateway/internal/redis"
 )
 
-var Clients = make(map[string]http.ResponseWriter)
+type Client struct {
+	Writer http.ResponseWriter
+	Done   chan struct{}
+}
 
-func Register(jobID string, w http.ResponseWriter) {
+var (
+	Clients = make(map[string]*Client)
+	mu      sync.Mutex
+)
 
-	Clients[jobID] = w
+func Register(jobID string, w http.ResponseWriter) *Client {
+	mu.Lock()
+	defer mu.Unlock()
 
+	client := &Client{
+		Writer: w,
+		Done:   make(chan struct{}),
+	}
+	Clients[jobID] = client
+	return client
 }
 
 func Remove(jobID string) {
+	mu.Lock()
+	defer mu.Unlock()
 
 	delete(Clients, jobID)
-
 }
 
 func Send(event redis.Event) {
+	mu.Lock()
+	client, ok := Clients[event.JobID]
+	mu.Unlock()
 
-	w, ok := Clients[event.JobID]
 	if !ok {
 		return
 	}
 
-	flusher, ok := w.(http.Flusher)
+	flusher, ok := client.Writer.(http.Flusher)
 	if !ok {
 		return
 	}
@@ -39,11 +57,20 @@ func Send(event redis.Event) {
 		return
 	}
 
-	_, err = fmt.Fprintf(w, "data: %s\n\n", data)
+	_, err = fmt.Fprintf(client.Writer, "data: %s\n\n", data)
 	if err != nil {
 		Remove(event.JobID)
 		return
 	}
 
 	flusher.Flush()
+
+	if event.Status == "COMPLETED" {
+		select {
+		case <-client.Done:
+		default:
+			close(client.Done)
+		}
+		Remove(event.JobID)
+	}
 }

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 	"relay/gateway/internal/db"
+	"relay/gateway/internal/events"
 	"relay/gateway/internal/handlers"
 	"relay/gateway/internal/redis"
 )
@@ -16,6 +17,7 @@ func main() {
 
 	db.Connect()
 	redis.Connect()
+	redis.StartSubscriber(events.Send)
 
 	http.HandleFunc("/", rootHandler)
 	http.HandleFunc("/health", handlers.HealthHandler)
