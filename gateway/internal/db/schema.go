@@ -8,8 +8,12 @@ func CreateJobsTable() {
 	CREATE TABLE IF NOT EXISTS jobs (
 		id TEXT PRIMARY KEY,
 		tool TEXT NOT NULL,
-		status TEXT NOT NULL
+		status TEXT NOT NULL,
+		result JSONB
 	);
+
+	ALTER TABLE jobs
+		ADD COLUMN IF NOT EXISTS result JSONB;
 	`
 
 	_, err := DB.Exec(query)
@@ -29,12 +33,19 @@ func CreateV2Tables() {
 		id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
 		status VARCHAR(32) NOT NULL DEFAULT 'PENDING',
 		current_step INT NOT NULL DEFAULT 1,
+		max_tokens INT NOT NULL DEFAULT 10000,
 		task_payload JSONB NOT NULL,
-		credentials JSONB,
+		secret_ref VARCHAR(256),
 		idempotency_key VARCHAR(128) UNIQUE NOT NULL,
 		created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
 		updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 	);
+
+	ALTER TABLE workflows
+		ADD COLUMN IF NOT EXISTS max_tokens INT NOT NULL DEFAULT 10000;
+
+	ALTER TABLE workflows
+		ADD COLUMN IF NOT EXISTS secret_ref VARCHAR(256);
 
 	CREATE TABLE IF NOT EXISTS wal_events (
 		id BIGSERIAL PRIMARY KEY,
