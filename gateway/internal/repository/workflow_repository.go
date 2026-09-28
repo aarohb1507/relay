@@ -26,6 +26,7 @@ func CreateOrGetWorkflow(request models.CreateWorkflowRequest) (models.Workflow,
 	}
 	defer tx.Rollback()
 
+	// Return an existing workflow before attempting a new insert.
 	var workflow models.Workflow
 	err = scanWorkflow(tx.QueryRow(`
 		SELECT id, status, current_step, max_tokens, task_payload,
@@ -62,6 +63,7 @@ func CreateOrGetWorkflow(request models.CreateWorkflowRequest) (models.Workflow,
 		`, request.WorkflowID, maxTokens, taskPayload, request.SecretRef, request.IdempotencyKey)
 	}
 
+	// A concurrent request may win the unique-key race; read its workflow instead.
 	err = scanWorkflow(row, &workflow)
 	if err == sql.ErrNoRows {
 		err = scanWorkflow(tx.QueryRow(`

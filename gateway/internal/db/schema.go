@@ -41,6 +41,7 @@ func CreateV2Tables() {
 		updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 	);
 
+	-- Keep startup initialization compatible with databases created before these columns existed.
 	ALTER TABLE workflows
 		ADD COLUMN IF NOT EXISTS max_tokens INT NOT NULL DEFAULT 10000;
 
@@ -55,6 +56,7 @@ func CreateV2Tables() {
 		event_type VARCHAR(64) NOT NULL,
 		payload JSONB NOT NULL,
 		created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+		-- One action may legitimately produce both INTENT and SUCCESS events.
 		UNIQUE (idempotency_key, event_type)
 	);
 
