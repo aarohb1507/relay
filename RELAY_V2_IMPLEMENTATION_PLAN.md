@@ -101,19 +101,12 @@ Relay cannot guarantee:
 
 ## Implementation Order
 
-### Phase 0: Recover and stabilize v1
+### Phase 0: Establish the v2 foundation
 
-Before adding new behavior:
-
-- trace the existing `/jobs` flow end to end;
-- fix the missing legacy `jobs.result` column;
-- verify PostgreSQL updates from the Python worker;
-- verify Redis Stream delivery;
-- verify Redis Pub/Sub to SSE delivery;
-- add basic repeatable tests or verification commands;
-- document what v1 does and what it does not do.
-
-The existing `/jobs` path remains temporarily available while v2 is introduced.
+Relay v2 is the product. Legacy job endpoints, job tables, and the old worker are
+not part of the runtime and should not be extended. Shared infrastructure such as
+PostgreSQL, Redis, health checks, and SSE may be reused only when its behavior is
+workflow-oriented and matches the v2 contracts.
 
 ### Phase 1: Durable workflow submission
 

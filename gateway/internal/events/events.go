@@ -19,7 +19,7 @@ var (
 	mu      sync.Mutex
 )
 
-func Register(jobID string, w http.ResponseWriter) *Client {
+func Register(workflowID string, w http.ResponseWriter) *Client {
 	mu.Lock()
 	defer mu.Unlock()
 
@@ -27,20 +27,20 @@ func Register(jobID string, w http.ResponseWriter) *Client {
 		Writer: w,
 		Done:   make(chan struct{}),
 	}
-	Clients[jobID] = client
+	Clients[workflowID] = client
 	return client
 }
 
-func Remove(jobID string) {
+func Remove(workflowID string) {
 	mu.Lock()
 	defer mu.Unlock()
 
-	delete(Clients, jobID)
+	delete(Clients, workflowID)
 }
 
 func Send(event redis.Event) {
 	mu.Lock()
-	client, ok := Clients[event.JobID]
+	client, ok := Clients[event.WorkflowID]
 	mu.Unlock()
 
 	if !ok {
@@ -59,18 +59,18 @@ func Send(event redis.Event) {
 
 	_, err = fmt.Fprintf(client.Writer, "data: %s\n\n", data)
 	if err != nil {
-		Remove(event.JobID)
+		Remove(event.WorkflowID)
 		return
 	}
 
 	flusher.Flush()
 
-	if event.Status == "COMPLETED" {
+	if event.Status == "SUCCESS" {
 		select {
 		case <-client.Done:
 		default:
 			close(client.Done)
 		}
-		Remove(event.JobID)
+		Remove(event.WorkflowID)
 	}
 }

@@ -7,9 +7,9 @@ import (
 )
 
 func EventsHandler(w http.ResponseWriter, r *http.Request) {
-	id := r.URL.Query().Get("id")
-	if id == "" {
-		http.Error(w, "Missing id", http.StatusBadRequest)
+	workflowID := r.URL.Query().Get("workflow_id")
+	if workflowID == "" {
+		http.Error(w, "workflow_id is required", http.StatusBadRequest)
 		return
 	}
 
@@ -23,7 +23,7 @@ func EventsHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Cache-Control", "no-cache")
 	w.Header().Set("Connection", "keep-alive")
 
-	client := events.Register(id, w)
+	client := events.Register(workflowID, w)
 
 	fmt.Fprintf(w, "data: connected\n\n")
 	flusher.Flush()
@@ -33,5 +33,5 @@ func EventsHandler(w http.ResponseWriter, r *http.Request) {
 	case <-r.Context().Done():
 	}
 
-	events.Remove(id)
+	events.Remove(workflowID)
 }
