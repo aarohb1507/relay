@@ -199,6 +199,28 @@ Relay must document provider-specific behavior instead of assuming that every AP
 
 Rollback is a separate control path, but it can initially run inside the Python worker. It must not use the LLM to decide how to undo work.
 
+## Action Persistence and Retry Rules
+
+Each action result is persisted in `wal_events.payload` as JSONB. The payload may contain the action input, provider response, normalized output, error details, and any data needed by the next workflow step or by crash recovery.
+
+Forward execution and rollback use separate retry paths:
+
+```text
+Attempt forward action
+  -> success: write SUCCESS with input and output to the WAL
+  -> transient failure: retry the same action with the same idempotency key
+  -> terminal failure or exhausted forward retries: begin rollback
+
+Attempt compensation
+  -> success: write UNDO_SUCCESS to the WAL
+  -> transient failure: retry the compensation
+  -> exhausted compensation retries: mark ROLLBACK_FAILED and alert an operator
+```
+
+Forward retries must be classified by the provider or tool adapter. A replacement worker must reconcile an uncertain result before repeating an external action. Compensation also requires a stable idempotency key because a worker can crash during an undo call.
+
+`workflows` stores the current snapshot, `wal_events` stores append-only action history and results, and `compensating_actions` stores the current undo state and retry counters. PostgreSQL remains the source of truth; a Redis dead-letter stream is only an operator notification mechanism.
+
 ### Phase 7: Production hardening
 
 - configuration management;
