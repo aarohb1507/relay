@@ -21,7 +21,8 @@ func main() {
 
 	http.HandleFunc("/", rootHandler)
 	http.HandleFunc("/health", handlers.HealthHandler)
-	http.HandleFunc("/jobs", handlers.JobHandler)
+	http.HandleFunc("/v1/workflows/execute", handlers.WorkflowExecuteHandler)
+	http.HandleFunc("/v1/workflows/", handlers.WorkflowHandler)
 	http.HandleFunc("/events", handlers.EventsHandler)
 
 	fmt.Println("Server running on port.")

@@ -2,29 +2,6 @@ package db
 
 import "log"
 
-func CreateJobsTable() {
-
-	query := `
-	CREATE TABLE IF NOT EXISTS jobs (
-		id TEXT PRIMARY KEY,
-		tool TEXT NOT NULL,
-		status TEXT NOT NULL,
-		result JSONB
-	);
-
-	ALTER TABLE jobs
-		ADD COLUMN IF NOT EXISTS result JSONB;
-	`
-
-	_, err := DB.Exec(query)
-
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	log.Println("Jobs table ready")
-}
-
 func CreateV2Tables() {
 	query := `
 	CREATE EXTENSION IF NOT EXISTS pgcrypto;
@@ -54,6 +31,7 @@ func CreateV2Tables() {
 		step_number INT NOT NULL,
 		idempotency_key VARCHAR(128) NOT NULL,
 		event_type VARCHAR(64) NOT NULL,
+		tokens_used INT NOT NULL DEFAULT 0,
 		payload JSONB NOT NULL,
 		created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
 		-- One action may legitimately produce both INTENT and SUCCESS events.
@@ -67,11 +45,36 @@ func CreateV2Tables() {
 		undo_action VARCHAR(64) NOT NULL,
 		undo_payload JSONB NOT NULL,
 		status VARCHAR(32) NOT NULL DEFAULT 'PENDING',
+		retry_count INT NOT NULL DEFAULT 0,
+		max_retries INT NOT NULL DEFAULT 3,
+		last_error TEXT,
 		created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+		,updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 	);
+
+	ALTER TABLE wal_events
+		ADD COLUMN IF NOT EXISTS tokens_used INT NOT NULL DEFAULT 0;
+
+	ALTER TABLE compensating_actions
+		ADD COLUMN IF NOT EXISTS retry_count INT NOT NULL DEFAULT 0;
+
+	ALTER TABLE compensating_actions
+		ADD COLUMN IF NOT EXISTS max_retries INT NOT NULL DEFAULT 3;
+
+	ALTER TABLE compensating_actions
+		ADD COLUMN IF NOT EXISTS last_error TEXT;
+
+	ALTER TABLE compensating_actions
+		ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW();
 
 	CREATE INDEX IF NOT EXISTS idx_wal_workflow_id
 		ON wal_events(workflow_id);
+
+	CREATE INDEX IF NOT EXISTS idx_wal_workflow_step
+		ON wal_events(workflow_id, step_number);
+
+	CREATE INDEX IF NOT EXISTS idx_wal_workflow_event
+		ON wal_events(workflow_id, event_type);
 
 	CREATE INDEX IF NOT EXISTS idx_compensating_workflow_id
 		ON compensating_actions(workflow_id, step_number DESC);

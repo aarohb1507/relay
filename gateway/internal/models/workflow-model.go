@@ -4,7 +4,15 @@ import "time"
 
 type WorkflowTask struct {
 	Goal   string         `json:"goal"`
-	Params map[string]any `json:"params"`
+	Prompt string         `json:"prompt,omitempty"`
+	Params map[string]any `json:"params,omitempty"`
+	Tools  []WorkflowTool `json:"tools,omitempty"`
+}
+
+type WorkflowTool struct {
+	Name        string         `json:"name"`
+	Description string         `json:"description,omitempty"`
+	InputSchema map[string]any `json:"input_schema,omitempty"`
 }
 
 type CreateWorkflowRequest struct {

@@ -4,12 +4,17 @@ import (
 	"database/sql"
 	"encoding/json"
 	"fmt"
+	"strings"
 
 	"relay/gateway/internal/db"
 	"relay/gateway/internal/models"
 )
 
 func CreateOrGetWorkflow(request models.CreateWorkflowRequest) (models.Workflow, bool, error) {
+	if strings.TrimSpace(request.IdempotencyKey) == "" {
+		return models.Workflow{}, false, fmt.Errorf("idempotency key is required")
+	}
+
 	taskPayload, err := json.Marshal(request.Task)
 	if err != nil {
 		return models.Workflow{}, false, fmt.Errorf("marshal workflow task: %w", err)

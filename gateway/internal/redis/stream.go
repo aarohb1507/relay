@@ -30,6 +30,16 @@ func PublishJob(job models.Job) error {
 	return nil
 }
 
+func PublishWorkflow(workflow models.Workflow) error {
+	_, err := Client.XAdd(Ctx, &goredis.XAddArgs{
+		Stream: "agent_tasks",
+		Values: map[string]interface{}{
+			"workflow_id": workflow.ID,
+		},
+	}).Result()
+	return err
+}
+
 func ReadJobs() error {
 
 	streams, err := Client.XRead(Ctx, &goredis.XReadArgs{

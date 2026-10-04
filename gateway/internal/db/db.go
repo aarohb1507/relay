@@ -29,6 +29,5 @@ func Connect() {
 
 	log.Println("Connected to PostgreSQL")
 
-	CreateJobsTable()
 	CreateV2Tables()
 }
